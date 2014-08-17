@@ -1,0 +1,60 @@
+---
+title: "Peer Assessment 1"
+author: "Kumar Aiyer"
+date: "Friday, August 15, 2014"
+output: html_document
+---
+
+## Loading Data and Cleaning
+
+We load the data after dowloading to the data directory. The data loading need not be repeated each time the document is _knitted_ .
+
+```{r dataloding, echo=TRUE}
+
+activity.raw <- read.csv("data/activity.csv")
+activity.nona.df <- activity.raw[!is.na(activity.raw$steps),]
+```
+
+## Mean and Median Total Number of Steps per Day
+
+Next, we compute the total number of steps per day. To compute this, we first filter out the NAs and then compute the number of steps per day. We then plot a histogram of the data and report the mean and median.
+
+```{r stepsperday, echo=TRUE}
+total_steps_per_day <- aggregate(activity.nona.df$steps, by=list(activity.nona.df$date), FUN=sum)$x
+hist(total_steps_per_day)
+mean(total_steps_per_day)
+median(total_steps_per_day)
+
+```
+
+## Average Daily Activity Pattern
+
+We than aggregate the data by 5min intervals across multiple days, plot the time series and find the interval with the maximum steps
+
+```{r dailypattern,echo=TRUE}
+mean_steps_per_5min <- aggregate(activity.nona.df$steps, by=list(activity.nona.df$interval), FUN=mean)
+names(mean_steps_per_5min) <- c("interval", "steps")
+plot(mean_steps_per_5min$interval, mean_steps_per_5min$steps, type='l')
+mean_steps_per_5min[mean_steps_per_5min$steps==max(mean_steps_per_5min$steps),]
+```
+## Imputing Missing Values
+
+In this we find the number of missing values and then fill the missing NA with the average across daily values for the particular interval. 
+
+```{r missingvalues,echo=TRUE}
+sum(is.na(activity.raw$steps)==TRUE)
+mean_steps_per_5min <- aggregate(activity.nona.df$steps, by=list(activity.nona.df$interval), FUN=mean)
+names(mean_steps_per_5min) <- c("interval", "steps")
+activity.new.df <- activity.raw
+for (i in dim(activity.raw)[1]) {
+  if (is.na(activity.new.df[i,]$steps)) {
+    new_steps <- mean_steps_per_5min[mean_steps_per_5min$interval==activity.new.df[i,]$interval,]$steps
+    new_steps
+    activity.new.df[i,]$steps <- new_steps
+  }
+}
+total_steps_per_day <- aggregate(activity.new.df$steps, by=list(activity.new.df$date), FUN=sum)$x
+hist(total_steps_per_day)
+mean(total_steps_per_day)
+median(total_steps_per_day)
+```
