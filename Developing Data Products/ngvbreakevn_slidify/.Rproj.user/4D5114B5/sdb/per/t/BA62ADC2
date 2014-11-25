@@ -1,0 +1,16 @@
+{
+    "contents" : "#\nlibrary(plyr)\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(XML)\nlibrary(reshape2)\nlibrary(zoo)\n\neiadata <- function() {\n  # monthly time series of nat. gas and diesel prices\n  urlg <- \"http://www.eia.gov/dnav/ng/hist/n3035us3M.htm\"\n  urld <- \"http://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=pet&s=emd_epd2d_pte_nus_dpg&f=m\"\n  \n  tablesg <- readHTMLTable(urlg)\n  tablesd <- readHTMLTable(urld)\n  # extract the html table as data frame\n  rawtblg <- tablesg[[6]]\n  rawtbld <- tablesd[[7]]\n  # clean out non-numeric values\n  rawtblg$Year <- as.numeric(gsub(\"[^0-9.]\",\"\",rawtblg$Year))\n  rawtbld$Year <- as.numeric(gsub(\"[^0-9.]\",\"\",rawtbld$Year))\n  # remove rows in which Year is NA\n  rawtblg <- rawtblg[is.na(rawtblg$Year)==FALSE,]\n  rawtbld <- rawtbld[is.na(rawtbld$Year)==FALSE,]\n  \n  # now melt data and continue cleaning data\n  \n  rawtblg <- melt(rawtblg, id=c(\"Year\"))\n  names(rawtblg)[2] <- c(\"Month\")\n  rawtblg$value <- as.numeric(rawtblg$value)\n  sortnames <- c(\"Year\", \"Month\")\n  rawtblg <- rawtblg[do.call(\"order\", rawtblg[sortnames]),]\n  variable <- rep(\"ngprice\",dim(rawtblg)[1])\n  rawtblg <- cbind(rawtblg, variable)\n  \n  rawtbld <- melt(rawtbld, id=c(\"Year\"))\n  names(rawtbld)[2] <- c(\"Month\")\n  rawtbld$value <- as.numeric(rawtbld$value)\n  rawtbld <- rawtbld[do.call(\"order\", rawtbld[sortnames]),]\n  variable <- rep(\"dieselprice\",dim(rawtbld)[1])\n  rawtbld <- cbind(rawtbld, variable)\n  \n  # now combine the two data frames\n  dflist <- list(rawtblg, rawtbld)\n  tbl.df <- rbind.fill(dflist)\n  # clean NA\n  # tbl.df\n  tbl.df <- tbl.df[!is.na(tbl.df$value),]\n  #now add CalDate column\n  yrmon <- paste(tbl.df$Year,\"-\",tbl.df$Month,sep=\"\")\n  caldate <- as.Date(as.yearmon(yrmon,\"%Y-%b\"))\n  tbl.df$caldate <- caldate\n  \n  # find min and max dates across the 2 variables\n  caldate.summary <- tbl.df %>% group_by(variable) %>% summarise(mindt=min(caldate), maxdt=max(caldate))\n  mindt <- max(caldate.summary$mindt)\n  maxdt <- min(caldate.summary$maxdt)\n  # now filter tbl.df to just the required rows\n  tbl.df <- tbl.df[tbl.df$caldate>=mindt & tbl.df$caldate<=maxdt, ]\n  tbl.df <- data.frame(caldate=tbl.df$caldate, variable=tbl.df$variable, value=tbl.df$value)\n  \n  # now plot data\n  #ggplot(tbl.df, aes(caldate, value)) +\n  #  geom_line(aes(color=variable)) \n  tbl.df\n}",
+    "created" : 1416937158621.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2002394230",
+    "id" : "BA62ADC2",
+    "lastKnownWriteTime" : 1416891117,
+    "path" : "~/GitHub/datasciencecoursera/Developing Data Products/ngvbreakevn_slidify/ngvbreakeven/eia_data.r",
+    "project_path" : "ngvbreakeven/eia_data.r",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

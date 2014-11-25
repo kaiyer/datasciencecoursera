@@ -1,20 +1,19 @@
 ---
-title       : NGVBreakeven
-subtitle    : Investment Breakeven For Compressed Natural Gas Powered Vehicles
-author      : Kumar Aiyer
-job         : Managing Partner, CleanFin LLC
-logo        : cleanfin_lg.png
-biglogo     : cleanfin_lg.png
-framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
-highlighter : highlight.js  # {highlight.js, prettify, highlight}
-widgets     : [mathjax, bootstrap, quiz]            # {mathjax, quiz, bootstrap}
-mode        : selfcontained # {standalone, draft}
-hitheme     : tomorrow
-knit        : slidify::knit2slides
+title: "NGVBreakeven"
+author: "Kumar Aiyer"
+framework: io2012
+output: pdf_document
+hitheme: tomorrow
+job: Managing Partner, CleanFin LLC
+knit: slidify::knit2slides
+logo: cleanfin_lg.png
+mode: selfcontained
+highlighter: highlight
+subtitle: Investment Breakeven For Compressed Natural Gas Powered Vehicles
+biglogo: cleanfin_lg.png
 ---
 
-## Introduction
-
+## Introduction ##
 
 NGVBreakeven is a clould-based investment breakeven calculator for Compressed Natural Gas (CNG) powered vehicles. It provides a historical time series of how long it takes for an initial investment to payback based on the savings of using CNG fuel compared to Diesel based on historical data. 
 
@@ -26,10 +25,70 @@ NGVBreakeven is a clould-based investment breakeven calculator for Compressed Na
   - Historical Graph of Fuel Prices
   - Historical Graph of Investment Breakeven
   - Data table
--> Help
-  - Online User Manual
-  
+
 ---
+
+## Using the Calculator ##
+
+NGVBreakeven can be accessed via the web at https://cleanfinllc.shinyapps.io/ngvbreakeven/
+
+-> Enter Vehicle Related Assumptions
+  - Vehicle Price 
+  - Annual Mileage
+  - MPG of Diesel Vehicle
+  - MPG of CNG Vehicle (in Diesel Gallon Equivalent)
+  
+-> Enter CNG Pricing Related Assumptions
+  - Acquisition Marketing Costs
+  - Electric Compression Costs
+  - Mainteance Costs
+  - Capital Amortization Costs
   
 
+---
 
+## Why NGVBreakeven? ##
+
+There are key reasons to using NGVBreakeven as a screening tool to look at the economics of owning a CNG powered vehicle
+
+- Uses publicly available data on fuel prices from U.S. Energy Information Administration (EIA)
+- The calculator is dynamic and will update itself to get the latest pricing data
+- The breakeven is calculated not only for current fuel prices but also historically back to 2001. The user can make a rational decision on the relative value of the investment by comparing the current breakeven with historical values
+- Ease of use. Just point to the URL, enter your data and you are in business
+
+---
+
+## Results ##
+
+```{r echo = FALSE, message=FALSE, warning=FALSE, comment=FALSE, cache=FALSE, fig.align='center', fig.width = 12}
+source("./eia_data.r")
+input <- data.frame(vehprice=180000, annmileage=150000, dieselmpg=7.5, cngmpg=5.5, cngtrans=0.20, cngelectric=0.10, cngmaintenance=0.40, cngamort=0.35)
+
+
+
+# compute the cng price in $/DGE
+GGEperMMBTU <- 7.74
+GGEperDGE <- 1.136
+
+df <- eiadata()
+ngprice <- df[df$variable=="ngprice",]
+cngdge <- (ngprice$value/GGEperMMBTU + input$cngtrans + input$cngelectric + input$cngmaintenance + input$cngamort) * GGEperDGE
+cngdge.df <- data.frame(caldate=ngprice$caldate, variable="cngprice", value=cngdge)  
+dflist <- list(df,cngdge.df)
+fuelprc.df <- rbind.fill(dflist)
+
+prcdiesel <- fuelprc.df[fuelprc.df$variable=="dieselprice",]$value
+prccng <- fuelprc.df[fuelprc.df$variable=="cngprice",]$value
+dieselgal <- input$annmileage/input$dieselmpg
+cnggal <- input$annmileage/input$cngmpg
+dieselcost <- prcdiesel * dieselgal
+cngcost <- prccng * cnggal
+annsavings <- dieselcost  - cngcost
+breakeven <-  rep(input$vehprice, length(prcdiesel)) %/% annsavings
+
+breakeven.df <- data.frame(caldate=fuelprc.df[fuelprc.df$variable=="dieselprice",]$caldate, variable=rep("breakeven", length(prcdiesel)), value=breakeven)
+ggplot(breakeven.df, aes(caldate, value)) + ggtitle("Investment Breakeven Graph") +
+  geom_line(aes(color=variable)) + xlab("Date") + ylab("Years") +
+  coord_cartesian(ylim=c(-15, 15)) + scale_y_continuous(breaks=seq(-15, 15, 1)) 
+
+```
