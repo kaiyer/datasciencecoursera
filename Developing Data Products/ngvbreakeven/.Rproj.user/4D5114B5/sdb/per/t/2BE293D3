@@ -1,0 +1,16 @@
+{
+    "contents" : "library(shiny)\nshinyUI(fluidPage(\n  \n  # Application title\n  titlePanel(\"Natural Gas Vehicle (NGV) Invesment Breakeven Calculator\"),\n  sidebarLayout(\n    # sidebar panel with input sliders\n    sidebarPanel(\n      tags$h4(\"CNG Vehicle Assumption\"),\n      \n      sliderInput(\"vehprice\", \n                  label=\"Vehicle Price ($)\", \n                  min = 100000,  max = 200000, value = 185000),\n      br(),\n      sliderInput(\"annmileage\", \n                  label=\"Annual Mileage (mi)\", \n                  min = 5000,  max = 250000,  value = 150000),\n      br(),\n      sliderInput(\"dieselmpg\", \n                  label=\"Fuel Economy (Diesel MPG)\", \n                  min = 5.0,  max = 10.0,  value = 7.5, round = FALSE, step = 0.25),\n      br(),\n      sliderInput(\"cngmpg\", \n                  label=\"Fuel Economy (CNG Miles/DGE)\", \n                  min = 5.0,  max = 10.0,  value = 5.5, round = FALSE, step = 0.25),\n      tags$h4(\"CNG Pricing Assumption\"),\n      numericInput(\"cngtrans\", \n                   label = \"Pipeline/Gas Acq/Marketer Services ($/GGE)\", \n                   value = 0.20),\n      numericInput(\"cngelectric\", \n                   label = \"Electric COmpression Costs ($/GGE)\", \n                   value = 0.10),\n      numericInput(\"cngmaintenance\", \n                   label = \"Maintenance Costs ($/GGE)\", \n                   value = 0.40),\n      numericInput(\"cngamort\", \n                   label = \"Capital Amortization (filling station) ($/GGE)\", \n                   value = 0.35)\n    ),\n    mainPanel(\n      tabsetPanel(type = \"tabs\", \n                  tabPanel(\"Results\", plotOutput(\"fuelprcPlot\"),br(),plotOutput(\"breakevenPlot\")), \n                  tabPanel('Data Table', dataTableOutput('datatable')),\n                  tabPanel(\"User Manual\", includeHTML(\"usermanual.html\"))               \n      )\n    )\n  )\n)\n)",
+    "created" : 1416891150547.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1853829471",
+    "id" : "2BE293D3",
+    "lastKnownWriteTime" : 1416891127,
+    "path" : "~/GitHub/datasciencecoursera/Developing Data Products/ngvbreakeven/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
