@@ -1,0 +1,16 @@
+{
+    "contents" : "library(shiny)\nsource(\"eia_data.r\")\n# Define server logic required to summarize and view the selected\n# dataset\nshinyServer(function(input, output) {\n  \n  # Return the breakeven mpg\n  datasetInput <- reactive({\n    # compute the cng price in $/DGE\n    GGEperMMBTU <- 7.74\n    GGEperDGE <- 1.136\n    \n    df <- eiadata()\n    ngprice <- df[df$variable==\"ngprice\",]\n    cngdge <- (ngprice$value/GGEperMMBTU + input$cngtrans + input$cngelectric + input$cngmaintenance + input$cngamort) * GGEperDGE\n    cngdge.df <- data.frame(caldate=ngprice$caldate, variable=\"cngprice\", value=cngdge)  \n    dflist <- list(df,cngdge.df)\n    fuelprc.df <- rbind.fill(dflist)\n    fuelprc.df\n  })\n  \n  data1 = reactive({\n    fuelprc.df<- datasetInput()\n    prcdiesel <- fuelprc.df[fuelprc.df$variable==\"dieselprice\",]$value\n    prccng <- fuelprc.df[fuelprc.df$variable==\"cngprice\",]$value\n    dieselgal <- input$annmileage/input$dieselmpg\n    cnggal <- input$annmileage/input$cngmpg\n    dieselcost <- prcdiesel * dieselgal\n    cngcost <- prccng * cnggal\n    annsavings <- dieselcost  - cngcost\n    breakeven <-  rep(input$vehprice, length(prcdiesel)) %/% annsavings\n    \n    breakeven.df <- data.frame(caldate=fuelprc.df[fuelprc.df$variable==\"dieselprice\",]$caldate, variable=rep(\"breakeven\", length(prcdiesel)), value=breakeven)\n    dflist <- list(fuelprc.df, breakeven.df)\n    final.df <- rbind.fill(dflist)\n    final.df\n  })\n  \n  # Generate a plot of the fuel price\n  output$fuelprcPlot <- renderPlot({\n    fuelprc.df<- datasetInput()\n    ggplot(fuelprc.df, aes(caldate, value)) + ggtitle(\"Fuel Price Graph\") +\n      geom_line(aes(color=variable)) + xlab(\"Date\") + ylab(\"$/(MMBTU,Gal,DGE)\") +\n      coord_cartesian(ylim=c(0, 14)) + scale_y_continuous(breaks=seq(0, 14, 0.5)) \n  })\n  output$breakevenPlot <- renderPlot({\n    fuelprc.df<- datasetInput()\n    prcdiesel <- fuelprc.df[fuelprc.df$variable==\"dieselprice\",]$value\n    prccng <- fuelprc.df[fuelprc.df$variable==\"cngprice\",]$value\n    dieselgal <- input$annmileage/input$dieselmpg\n    cnggal <- input$annmileage/input$cngmpg\n    dieselcost <- prcdiesel * dieselgal\n    cngcost <- prccng * cnggal\n    annsavings <- dieselcost  - cngcost\n    breakeven <-  rep(input$vehprice, length(prcdiesel)) %/% annsavings\n    \n    breakeven.df <- data.frame(caldate=fuelprc.df[fuelprc.df$variable==\"dieselprice\",]$caldate, variable=rep(\"breakeven\", length(prcdiesel)), value=breakeven)\n    ggplot(breakeven.df, aes(caldate, value)) + ggtitle(\"Investment Breakeven Graph\") +\n      geom_line(aes(color=variable)) + xlab(\"Date\") + ylab(\"Years\") +\n      coord_cartesian(ylim=c(-15, 15)) + scale_y_continuous(breaks=seq(-15, 15, 1)) \n  })\n  \n  output$datatable <-renderDataTable(function(){\n    if(!is.null(data1())){\n      d<-data1()\n      print(d)\n    }\n  }, options = list(pageLength = 10)) \n  \n})",
+    "created" : 1416893045434.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1309643514",
+    "id" : "F3903591",
+    "lastKnownWriteTime" : 1416891142,
+    "path" : "~/GitHub/datasciencecoursera/Developing Data Products/ngvbreakeven/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

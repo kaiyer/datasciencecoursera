@@ -1,0 +1,16 @@
+{
+    "contents" : "---\ntitle       : NGVBreakeven\nsubtitle    : Investment Breakeven For Compressed Natural Gas Powered Vehicles\nauthor      : Kumar Aiyer\njob         : Managing Partner, CleanFin LLC\nlogo        : cleanfin_lg.png\nbiglogo     : cleanfin_lg.png\nframework   : io2012        # {io2012, html5slides, shower, dzslides, ...}\nhighlighter : highlight.js  # {highlight.js, prettify, highlight}\nwidgets     : [mathjax, bootstrap, quiz]            # {mathjax, quiz, bootstrap}\nmode        : selfcontained # {standalone, draft}\nhitheme     : tomorrow\nknit        : slidify::knit2slides\n---\n\n## Introduction\n\n\nNGVBreakeven is a clould-based investment breakeven calculator for Compressed Natural Gas (CNG) powered vehicles. It provides a historical time series of how long it takes for an initial investment to payback based on the savings of using CNG fuel compared to Diesel based on historical data. \n\n-> Calculator Inputs\n  - Vehicle Related Assumptions\n  - CNG Pricing Related Assumptions\n  \n-> Calculator Outputs \n  - Historical Graph of Fuel Prices\n  - Historical Graph of Investment Breakeven\n  - Data table\n-> Help\n  - Online User Manual\n  \n---\n  \n\n\n",
+    "created" : 1416921035856.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4092082696",
+    "id" : "AB1F4139",
+    "lastKnownWriteTime" : 1416928574,
+    "path" : "~/GitHub/datasciencecoursera/Developing Data Products/ngvbreakevn_slidify/ngvbreakeven/index.Rmd",
+    "project_path" : "ngvbreakeven/index.Rmd",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_markdown"
+}
